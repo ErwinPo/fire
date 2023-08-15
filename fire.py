@@ -4,6 +4,8 @@ from mesa.time import RandomActivation
 
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
+from mesa.visualization.UserParam import Slider
+
 
 class Tree(Agent):
     FINE = 0
@@ -21,7 +23,7 @@ class Tree(Agent):
             self.condition = self.BURNED_OUT
 
 class Forest(Model):
-    def __init__(self, height=50, width=50, density=0.45):
+    def __init__(self, height=50, width=50, density=0.61):
         super().__init__()
         self.schedule = RandomActivation(self)
         self.grid = SingleGrid(height, width, torus=False)
@@ -49,7 +51,10 @@ def agent_portrayal(agent):
     return portrayal
 
 grid = CanvasGrid(agent_portrayal, 50, 50, 450, 450)
-server = ModularServer(Forest, [grid], "Forest", {})
+server = ModularServer(Forest, [grid], "Forest", {
+    "density": Slider("Tree density", 0.45, 0.01, 1.0, 0.01),
+    "width":50, "height":50
+})
 
 server.port = 8522 # The default
 server.launch()
