@@ -18,26 +18,26 @@ class Tree(Agent):
     BURNING = 1
     BURNED_OUT = 2
     
-    def __init__(self, model: Model, slide_tree_pos):
+    def __init__(self, model: Model, probability_of_spread):
         super().__init__(model.next_id(), model)
         self.condition = self.FINE
-        self.slide_tree_pos = slide_tree_pos
+        self.probability_of_spread = probability_of_spread
         
     def step(self):
         if self.condition == self.BURNING:
             for neighbor in self.model.grid.iter_neighbors(self.pos, moore=False): 
-                if neighbor.condition == self.FINE and self.random.random()*100 <= self.slide_tree_pos:
+                if neighbor.condition == self.FINE and self.random.random()*100 <= self.probability_of_spread:
                     neighbor.condition = self.BURNING
             self.condition = self.BURNED_OUT
 
 class Forest(Model):
-    def __init__(self, height=50, width=50, density=0.80, slide_tree_pos=0):
+    def __init__(self, height=50, width=50, density=0.80, probability_of_spread=0):
         super().__init__()
         self.schedule = RandomActivation(self)
         self.grid = SingleGrid(height, width, torus=False)
         for _,(x,y) in self.grid.coord_iter():
             if self.random.random() < density: #Se construten los arboles random tomando en cuenta una densidad
-                tree = Tree(self,slide_tree_pos)
+                tree = Tree(self,probability_of_spread)
                 if x == 0:
                     tree.condition = Tree.BURNING
                 self.grid.place_agent(tree, (x,y))
@@ -76,7 +76,7 @@ chart = ChartModule([{"Label": "Percent burned", "Color": "Black"}], data_collec
 server = ModularServer(Forest,[grid, chart],"Forest",
                        {
                            "density": Slider("Tree density", 0.45, 0.01, 1.0, 0.01), "width":50, "height":50,
-                           "slide_tree_pos": Slider("Probabilidad", 0, 0, 100, 1), "width":50, "height":50
+                           "probability_of_spread": Slider("Probabilidad", 0, 0, 100, 1), "width":50, "height":50
                         })
 
 server.port = 8522 # The default
