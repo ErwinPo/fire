@@ -25,11 +25,45 @@ class Tree(Agent):
         self.condition = self.FINE
         self.south_wind_speed = south_wind_speed
         self.west_wind_speed = west_wind_speed
-        self.probability_of_spread = probability_of_spread + south_wind_speed + west_wind_speed
+        self.probability_of_spread = probability_of_spread
+            
+    def wind(self):
+        (x,y) = self.pos
+        if self.south_wind_speed > 0: 
+            if self.west_wind_speed == 0:
+                y = y + 1 
+            elif self.west_wind_speed > 0:
+                y = y + 1
+                x = x + 1
+            else:
+                y = y + 1
+                x = x - 1
+        
+        elif self.south_wind_speed < 0: 
+            if self.west_wind_speed == 0:
+                y = y - 1
+            elif self.west_wind_speed < 0:
+                y = y - 1
+                x = x - 1
+            else:
+                y = y - 1
+                x = x + 1
+        
+        elif self.south_wind_speed == 0: 
+            if self.west_wind_speed > 0:
+                x = x + 1
+            elif self.west_wind_speed < 0:
+                x = x - 1
+                
+        if self.model.grid.out_of_bounds((x,y)):
+            return ([self.pos])
+        else:
+            return([(x,y)]) 
+                
         
     def step(self):
         if self.condition == self.BURNING:
-            for neighbor in self.model.grid.iter_neighbors(self.pos, moore=False): 
+            for neighbor in self.model.grid.get_cell_list_contents(self.wind()):
                 if neighbor.condition == self.FINE and self.random.random()*100 <= self.probability_of_spread: # Se mide la probabilidad de propagación por cada step y se compara con un valor porcentual
                     neighbor.condition = self.BURNING
             self.condition = self.BURNED_OUT
